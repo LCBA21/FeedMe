@@ -13,17 +13,24 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-
+// FoodServiceImpl.java
 @Service
-public class FoodServiceImpl implements FoodService{
+public class FoodServiceImpl implements FoodService {
+
+
+
+    private final FoodRepository foodRepository;
 
     @Autowired
-    private FoodRepository foodRepository;
+    public FoodServiceImpl(FoodRepository foodRepository) {
+        this.foodRepository = foodRepository;
+    }
+
 
 
     @Override
     public Food createFood(CreateFoodRequest request, Category category, Restaurant restaurant) {
-        Food food=new Food();
+        Food food = new Food();
         food.setFoodCategory(category);
         food.setRestaurant(restaurant);
         food.setDescription(request.getDescription());
@@ -32,83 +39,72 @@ public class FoodServiceImpl implements FoodService{
         food.setPrice(request.getPrice());
         food.setIngredientsItems(request.getIngredients());
         food.setSeasonal(request.isSeasonal());
-        food.isVegetarian(request.isVegetarian());
+        food.setVegetarian(request.isVegetarian()); // Updated method call
 
-        Food savedFood=foodRepository.save(food);
+        Food savedFood = foodRepository.save(food);
         restaurant.getFoods().add(savedFood);
 
-        return  savedFood;
+        return savedFood;
     }
 
     @Override
     public void deleteFood(Long id) throws Exception {
-        Food food=findFoodById(id);
+        Food food = findFoodById(id);
         foodRepository.delete(food);
-        foodRepository.save(food);
     }
 
     @Override
     public List<Food> getRestaurantsFood(Long restaurantId, boolean isVegitarian, boolean isNonVeg, boolean isSeasonal, String foodCategory) {
+        List<Food> foods = foodRepository.findByRestaurantId(restaurantId);
 
-       List<Food> foods=foodRepository.findByRestaurantId(restaurantId);
+        if (isVegitarian) {
+            foods = filterByVegetarian(foods, isVegitarian);
+        }
+        if (isNonVeg) {
+            foods = filterByNoVeg(foods, isNonVeg);
+        }
+        if (isSeasonal) {
+            foods = filterBySeasonal(foods, isSeasonal);
+        }
+        if (foodCategory != null && !foodCategory.equals("")) {
+            foods = filterByCategory(foods, foodCategory);
+        }
 
-       if (isVegitarian){
-           foods=filterByVegetarian(foods,isVegitarian);
-       }
-       if (isNonVeg){
-           foods=filterByNoVeg( foods,  isNonVeg);
-       }
-       if (isSeasonal){
-           foods=filterBySeasonal(foods,isSeasonal);
-       }
-       if (foodCategory!=null && !foodCategory.equals("")){
-           foods=filterByCategory(foods,foodCategory);
-       }
-
-
-        return List.of();
+        return foods;
     }
 
     private List<Food> filterByCategory(List<Food> foods, String foodCategory) {
-
         return foods.stream().filter(food -> {
-            if (food.getFoodCategory()!=null){
-
+            if (food.getFoodCategory() != null) {
                 return food.getFoodCategory().getName().equals(foodCategory);
-            }else {
-
+            } else {
                 return false;
             }
         }).collect(Collectors.toList());
     }
 
     private List<Food> filterBySeasonal(List<Food> foods, boolean isSeasonal) {
-        return foods.stream().filter(food -> food.isSeasonal()==isSeasonal).collect(Collectors.toList());
-
-
+        return foods.stream().filter(food -> food.isSeasonal() == isSeasonal).collect(Collectors.toList());
     }
 
     private List<Food> filterByNoVeg(List<Food> foods, boolean isNonVeg) {
-        return foods.stream().filter(food -> food.isVegetarian()==false).collect(Collectors.toList());
-
+        return foods.stream().filter(food -> !food.isVegetarian()).collect(Collectors.toList());
     }
 
     private List<Food> filterByVegetarian(List<Food> foods, boolean isVegitarian) {
-
-        return foods.stream().filter(food -> food.isVegetarian()==isVegitarian).collect(Collectors.toList());
+        return foods.stream().filter(food -> food.isVegetarian() == isVegitarian).collect(Collectors.toList());
     }
 
     @Override
-    public List<Food> searchFood(String keyword) {
-        return foodRepository.searchFood(keyword);
+    public List<Food> searchFood(String searchTerm) {
+        return foodRepository.searchFood(searchTerm);
     }
 
     @Override
     public Food findFoodById(Long id) throws Exception {
+        Optional<Food> optionalFood = foodRepository.findById(id);
 
-        Optional<Food> optionalFood=foodRepository.findById(id);
-
-        if (optionalFood.isEmpty()){
+        if (optionalFood.isEmpty()) {
             throw new Exception("Food Doesn't Exist");
         }
 
@@ -117,11 +113,8 @@ public class FoodServiceImpl implements FoodService{
 
     @Override
     public Food updateAvailibilityStatus(Long id) throws Exception {
-
-        Food food=findFoodById(id);
+        Food food = findFoodById(id);
         food.setAvailable(!food.isAvailable());
-       Food availbleFood= foodRepository.save(food);
-
-        return availbleFood;
+        return foodRepository.save(food);
     }
 }
