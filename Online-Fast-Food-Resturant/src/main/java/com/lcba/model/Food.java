@@ -9,10 +9,10 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+
+// Food.java
 @Entity
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class Food {
 
     @Id
@@ -35,92 +35,22 @@ public class Food {
     @ManyToOne(fetch = FetchType.LAZY)
     private Restaurant restaurant;
 
-    private boolean isVegetarian;
-    private boolean isSeasonal;
+    private boolean vegetarian;
+    private boolean seasonal;
 
     @ManyToMany
     private List<IngredientsItem> ingredientsItems = new ArrayList<>();
 
     private LocalDateTime creationDate;
 
-    public LocalDateTime getCreationDate() {
-        return creationDate;
+    // Getters and Setters
+
+    public Long getId() {
+        return id;
     }
 
-    public void setCreationDate(LocalDateTime creationDate) {
-        this.creationDate = creationDate;
-    }
-
-    public List<IngredientsItem> getIngredientsItems() {
-        return ingredientsItems;
-    }
-
-    public void setIngredientsItems(List<IngredientsItem> ingredientsItems) {
-        this.ingredientsItems = ingredientsItems;
-    }
-
-    public boolean isSeasonal() {
-        return isSeasonal;
-    }
-
-    public void setSeasonal(boolean seasonal) {
-        isSeasonal = seasonal;
-    }
-
-    public boolean isVegetarian(boolean vegetarian) {
-        return isVegetarian;
-    }
-
-    public void setVegetarian(boolean vegetarian) {
-        isVegetarian = vegetarian;
-    }
-
-    public Restaurant getRestaurant() {
-        return restaurant;
-    }
-
-    public void setRestaurant(Restaurant restaurant) {
-        this.restaurant = restaurant;
-    }
-
-    public boolean isAvailable() {
-        return available;
-    }
-
-    public void setAvailable(boolean available) {
-        this.available = available;
-    }
-
-    public List<String> getImages() {
-        return images;
-    }
-
-    public void setImages(List<String> images) {
-        this.images = images;
-    }
-
-    public Category getFoodCategory() {
-        return foodCategory;
-    }
-
-    public void setFoodCategory(Category foodCategory) {
-        this.foodCategory = foodCategory;
-    }
-
-    public Long getPrice() {
-        return price;
-    }
-
-    public void setPrice(Long price) {
-        this.price = price;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -131,11 +61,83 @@ public class Food {
         this.name = name;
     }
 
-    public Long getId() {
-        return id;
+    public String getDescription() {
+        return description;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Long getPrice() {
+        return price;
+    }
+
+    public void setPrice(Long price) {
+        this.price = price;
+    }
+
+    public Category getFoodCategory() {
+        return foodCategory;
+    }
+
+    public void setFoodCategory(Category foodCategory) {
+        this.foodCategory = foodCategory;
+    }
+
+    public List<String> getImages() {
+        return images;
+    }
+
+    public void setImages(List<String> images) {
+        this.images = images;
+    }
+
+    public boolean isAvailable() {
+        return available;
+    }
+
+    public void setAvailable(boolean available) {
+        this.available = available;
+    }
+
+    public Restaurant getRestaurant() {
+        return restaurant;
+    }
+
+    public void setRestaurant(Restaurant restaurant) {
+        this.restaurant = restaurant;
+    }
+
+    public boolean isVegetarian() {
+        return vegetarian;
+    }
+
+    public void setVegetarian(boolean vegetarian) {
+        this.vegetarian = vegetarian;
+    }
+
+    public boolean isSeasonal() {
+        return seasonal;
+    }
+
+    public void setSeasonal(boolean seasonal) {
+        this.seasonal = seasonal;
+    }
+
+    public List<IngredientsItem> getIngredientsItems() {
+        return ingredientsItems;
+    }
+
+    public void setIngredientsItems(List<IngredientsItem> ingredientsItems) {
+        this.ingredientsItems = ingredientsItems;
+    }
+
+    public LocalDateTime getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(LocalDateTime creationDate) {
+        this.creationDate = creationDate;
     }
 }
