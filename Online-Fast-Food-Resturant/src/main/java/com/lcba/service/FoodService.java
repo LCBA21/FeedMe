@@ -21,13 +21,10 @@ public interface FoodService {
                                          boolean isSeasonal,
                                          String foodCategory);
 
-    public List<Food> searchFood(String keyword);
+    public List<Food> searchFood(String searchTerm);
 
     public Food findFoodById(Long id) throws Exception;
 
     public Food updateAvailibilityStatus(Long id) throws Exception;
-
-
-
 
 }
