@@ -30,17 +30,41 @@ public class AdminFoodController {
 
 
     @PostMapping("/createFood")
-    public ResponseEntity<Food> createFood(
+    public ResponseEntity<?> createFood(
             @RequestBody CreateFoodRequest request,
             @RequestHeader("Authorization") String jwt
-    ) throws Exception {
+    ) {
+        try {
+            // Validate Authorization header
+            if (jwt == null || !jwt.startsWith("Bearer ")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(new MessageResponse("Invalid or missing Authorization header"));
+            }
 
-        User user=userService.findUserByJwtToken(jwt);
-        Restaurant restaurant=restaurantService.findRestaurantById(request.getRestaurantId());
-        Food food=foodService.createFood(request,request.getCategory(),restaurant);
+            // Extract token from Bearer string
+            String token = jwt.substring(7);
 
-        return new ResponseEntity<>(food, HttpStatus.CREATED);
+            try {
+                // Validate and find user based on the token
+                User user = userService.findUserByJwtToken(token);
+
+                // Find restaurant
+                Restaurant restaurant = restaurantService.findRestaurantById(request.getRestaurantId());
+
+                // Create food
+                Food food = foodService.createFood(request, request.getCategory(), restaurant);
+
+                return new ResponseEntity<>(food, HttpStatus.CREATED);
+            } catch (io.jsonwebtoken.io.DecodingException e) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(new MessageResponse("Invalid token format: " + e.getMessage()));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new MessageResponse("Error creating food: " + e.getMessage()));
+        }
     }
+
 
     @DeleteMapping("/deleteFood/{id}")
     public ResponseEntity<MessageResponse> deleteFood(
@@ -50,7 +74,7 @@ public class AdminFoodController {
 
         User user=userService.findUserByJwtToken(jwt);
         foodService.deleteFood(id);
-        MessageResponse res=new MessageResponse();
+        MessageResponse res=new MessageResponse("Invalid or missing Authorization header");
         res.setMessage("Food Deleted Successfully");
 
         return new ResponseEntity<>(res, HttpStatus.CREATED);
@@ -58,18 +82,62 @@ public class AdminFoodController {
 
 
     @PutMapping("/updateFoodAvailibity/{id}")
-    public ResponseEntity<Food> updateFoodAvailityStatus(
+    public ResponseEntity<?> updateFoodAvailityStatus(
             @PathVariable Long id,
             @RequestHeader("Authorization") String jwt
-    ) throws Exception {
+    ) {
+        try {
+            // Validate Authorization header
+            if (jwt == null || !jwt.startsWith("Bearer ")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(new MessageResponse("Invalid or missing Authorization header"));
+            }
 
-        User user=userService.findUserByJwtToken(jwt);
-        Food food= foodService.updateAvailibilityStatus(id);
+            // Extract token from Bearer string
+            String token = jwt.substring(7);
 
+            try {
+                // Validate and find user based on the token
+                User user = userService.findUserByJwtToken(token);
 
-        return new ResponseEntity<>(food, HttpStatus.CREATED);
+                // Update food availability status
+                Food food = foodService.updateAvailibilityStatus(id);
+
+                return new ResponseEntity<>(food, HttpStatus.CREATED);
+            } catch (io.jsonwebtoken.io.DecodingException e) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(new MessageResponse("Invalid token format: " + e.getMessage()));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new MessageResponse("Error updating food availability status: " + e.getMessage()));
+        }
     }
 
+    @GetMapping("/findFood/{id}")
+    public ResponseEntity<?> findFoodById(@PathVariable Long id, @RequestHeader("Authorization") String jwt) {
+        try {
+            // Extract the token from the Bearer string
+            if (jwt == null || !jwt.startsWith("Bearer ")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(new MessageResponse("Invalid or missing Authorization header"));
+            }
+
+            String token = jwt.substring(7); // Remove "Bearer " prefix
+
+            // Find user based on the token
+            User user = userService.findUserByJwtToken(token);
+
+            // Retrieve the food item by ID
+            Food food = foodService.findFoodById(id);
+
+            return new ResponseEntity<>(food, HttpStatus.OK);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new MessageResponse("Error finding food: " + e.getMessage()));
+        }
+    }
 
 
 }

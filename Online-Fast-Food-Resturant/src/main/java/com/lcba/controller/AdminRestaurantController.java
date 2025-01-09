@@ -31,7 +31,7 @@ public class AdminRestaurantController {
             // Extract the token from the Bearer string
             if (jwt == null || !jwt.startsWith("Bearer ")) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(new MessageResponse());
+                        .body(new MessageResponse("Invalid or missing Authorization header"));
             }
 
             String token = jwt.substring(7); // Remove "Bearer " prefix
@@ -46,7 +46,7 @@ public class AdminRestaurantController {
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new MessageResponse());
+                    .body(new MessageResponse("Invalid or missing Authorization header"));
         }
     }
 
@@ -57,7 +57,7 @@ public class AdminRestaurantController {
             // Validate Authorization header
             if (jwt == null || !jwt.startsWith("Bearer ")) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(new MessageResponse());
+                        .body(new MessageResponse("Invalid or missing Authorization header"));
             }
 
             // Extract token from Bearer string
@@ -73,11 +73,11 @@ public class AdminRestaurantController {
                 return new ResponseEntity<>(restaurants, HttpStatus.OK);
             } catch (io.jsonwebtoken.io.DecodingException e) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(new MessageResponse());
+                        .body(new MessageResponse("Invalid or missing Authorization header"));
             }
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new MessageResponse());
+                    .body(new MessageResponse("Invalid or missing Authorization header"));
         }
     }
 
@@ -93,7 +93,7 @@ public class AdminRestaurantController {
             // Validate Authorization header
             if (jwt == null || !jwt.startsWith("Bearer ")) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(new MessageResponse());
+                        .body(new MessageResponse("Invalid or missing Authorization header"));
             }
 
             // Extract token from Bearer string
@@ -109,26 +109,51 @@ public class AdminRestaurantController {
                 return new ResponseEntity<>(restaurant, HttpStatus.OK);
             } catch (io.jsonwebtoken.io.DecodingException e) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(new MessageResponse());
+                        .body(new MessageResponse("Invalid or missing Authorization header"));
             }
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new MessageResponse());
+                    .body(new MessageResponse("Invalid or missing Authorization header"));
         }
     }
 
 
+
     @DeleteMapping("/deleteRestaurant/{id}")
-    public ResponseEntity<MessageResponse> deleteRestaurant(
+    public ResponseEntity<?> deleteRestaurant(
                                                        @RequestHeader("Authorization") String jwt,
                                                        @PathVariable Long id
     ) throws Exception{
-        User user=userService.findUserByJwtToken(jwt);
-        restaurantService.deleteRestaurant(id);
-        MessageResponse response=new MessageResponse();
-        response.setMessage("Restaurant Deleted Successfully");
+        try {
+            // Validate Authorization header
+            if (jwt == null || !jwt.startsWith("Bearer ")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(new MessageResponse("Invalid or missing Authorization header"));
+            }
 
-        return new ResponseEntity<>(response, HttpStatus.OK);
+            // Extract token from Bearer string
+            String token = jwt.substring(7);
+
+
+
+            try {
+
+                User user=userService.findUserByJwtToken(token);
+
+                restaurantService.deleteRestaurant(id);
+                MessageResponse response=new MessageResponse("Invalid or missing Authorization header");
+                response.setMessage("Restaurant Deleted Successfully");
+                return new ResponseEntity<>(response, HttpStatus.OK);
+
+            }catch (io.jsonwebtoken.io.DecodingException e) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(new MessageResponse("Invalid or missing Authorization header"));
+            }
+
+        }catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new MessageResponse("Invalid or missing Authorization header"));
+        }
     }
 
     @PutMapping("/updateRestaurantStatus/{id}/status")
@@ -140,7 +165,7 @@ public class AdminRestaurantController {
             // Validate Authorization header
             if (jwt == null || !jwt.startsWith("Bearer ")) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(new MessageResponse());
+                        .body(new MessageResponse("Invalid or missing Authorization header"));
             }
 
             // Extract token from Bearer string
@@ -156,27 +181,45 @@ public class AdminRestaurantController {
                 return new ResponseEntity<>(restaurant, HttpStatus.OK);
             } catch (io.jsonwebtoken.io.DecodingException e) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(new MessageResponse());
+                        .body(new MessageResponse("Invalid or missing Authorization header"));
             }
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new MessageResponse());
+                    .body(new MessageResponse("Invalid or missing Authorization header"));
         }
     }
 
 
-    @GetMapping("/findRestaurantByUserId/{id}")
-    public ResponseEntity<Restaurant> findRestaurantByUserId(
-                                                             @RequestHeader("Authorization") String jwt
-    ) throws Exception{
-        User user=userService.findUserByJwtToken(jwt);
-        Restaurant restaurant=restaurantService.getRestaurantByUserId(user.getId());
+    @GetMapping("/findRestaurantByUserId/{userId}")
+    public ResponseEntity<?> findRestaurantByUserId(
+            @PathVariable Long userId,
+            @RequestHeader("Authorization") String jwt
+    ) {
+        try {
+            // Extract the token from the Bearer string
+            if (jwt == null || !jwt.startsWith("Bearer ")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(new MessageResponse("Invalid or missing Authorization header"));
+            }
 
+            String token = jwt.substring(7); // Remove "Bearer " prefix
 
-        return new ResponseEntity<>(restaurant, HttpStatus.OK);
+            // Find user based on the token
+            User user = userService.findUserByJwtToken(token);
+
+            // Get restaurant by user ID
+            Restaurant restaurant = restaurantService.getRestaurantByUserId(userId);
+
+            return new ResponseEntity<>(restaurant, HttpStatus.OK);
+
+        } catch (io.jsonwebtoken.io.DecodingException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new MessageResponse("Invalid JWT token: " + e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new MessageResponse("Error retrieving restaurant: " + e.getMessage()));
+        }
     }
-
-
 
 
 }
