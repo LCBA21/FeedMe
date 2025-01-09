@@ -9,9 +9,12 @@ import com.lcba.repository.CartItemRepository;
 import com.lcba.repository.CartRepository;
 import com.lcba.repository.FoodRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+
+@Service
 public class CartServiceImpl implements CartService{
 
     @Autowired
